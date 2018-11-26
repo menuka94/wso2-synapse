@@ -388,7 +388,10 @@ public class TargetRequest {
     public boolean hasEntityBody() {
         return hasEntityBody;
     }
-    
+
+    public URL getUrl() {
+        return url;
+    }
 
     public void setHasEntityBody(boolean hasEntityBody) {
 		this.hasEntityBody = hasEntityBody;
