@@ -21,6 +21,7 @@ package org.apache.synapse.mediators.eip;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMNode;
 import org.apache.axiom.soap.SOAPEnvelope;
@@ -236,7 +237,17 @@ public class EIPUtils {
                     JsonElement element = parser.parse(result);
                     return element.getAsJsonArray();
                 }
-                return parser.parse(list.get(0).toString());
+                JsonElement result;
+                String resultString = list.get(0).toString().trim();
+                try {
+                    result = parser.parse(resultString);
+                } catch (JsonSyntaxException e) {
+                    // Enclosing using quotes due to the following issue
+                    // https://github.com/google/gson/issues/1286
+                    resultString = "\"" + resultString + "\"";
+                    result = parser.parse(resultString);
+                }
+                return result;
             }
             return null;
         }
