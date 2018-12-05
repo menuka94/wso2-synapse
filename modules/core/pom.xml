@@ -285,12 +285,23 @@
 			<version>1.6.1-wso2v10</version>
 		</dependency-->
 		<dependency>
-			<groupId>com.jayway.jsonpath</groupId>
+			<groupId>org.wso2.orbit.com.jayway.jsonpath</groupId>
 			<artifactId>json-path</artifactId>
 		</dependency>
-        <dependency>
+		<!-- Jayway Json-path dependencies used for test cases -->
+		<dependency>
 			<groupId>com.jayway.jsonpath</groupId>
 			<artifactId>json-path-assert</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
 			<scope>test</scope>
 		</dependency>
         <dependency>
