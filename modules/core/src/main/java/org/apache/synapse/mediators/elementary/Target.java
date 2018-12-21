@@ -352,7 +352,7 @@ public class Target {
      * @param synLog Default Logger for the package.
      */
     public void insertJson(MessageContext synCtx, Object sourceJsonElement, SynapseLog synLog) {
-
+        JsonParser jsonParser = new JsonParser();
         String jsonPath = null;
         SynapseJsonPath sourceJsonPath = null;
         if (xpath != null) {
@@ -379,8 +379,7 @@ public class Target {
                 break;
             }
             case EnrichMediator.PROPERTY: {
-                JsonElement jsonElement = JsonPath.using(Configuration.defaultConfiguration()).parse(sourceJsonElement).
-                        json();
+                JsonElement jsonElement = jsonParser.parse(sourceJsonElement.toString());
                 if (action.equalsIgnoreCase(ACTION_REPLACE)) {
                     // replacing the property with new value
                     synCtx.setProperty(property, jsonElement.toString());
