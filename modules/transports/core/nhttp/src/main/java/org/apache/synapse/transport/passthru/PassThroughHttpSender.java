@@ -568,8 +568,16 @@ public class PassThroughHttpSender extends AbstractHandler implements TransportS
                 //when there is no SOAPAction.
                 if (Constants.VALUE_TRUE.equals(msgContext.getProperty(Constants.Configuration.ENABLE_MTOM)) ||
                         Constants.VALUE_TRUE.equals(msgContext.getProperty(Constants.Configuration.ENABLE_SWA))) {
-                    msgContext.setProperty(Constants.Configuration.CONTENT_TYPE, PassThroughConstants.CONTENT_TYPE_MULTIPART_RELATED);
-                    msgContext.setProperty(Constants.Configuration.MESSAGE_TYPE, PassThroughConstants.CONTENT_TYPE_MULTIPART_RELATED);
+                    Object contentType = msgContext.getProperty(Constants.Configuration.CONTENT_TYPE);
+
+                    if (contentType == null
+                        || !((String) contentType).trim()
+                                                  .startsWith(PassThroughConstants.CONTENT_TYPE_MULTIPART_RELATED)) {
+                        msgContext.setProperty(Constants.Configuration.CONTENT_TYPE,
+                                               PassThroughConstants.CONTENT_TYPE_MULTIPART_RELATED);
+                    }
+                    msgContext.setProperty(Constants.Configuration.MESSAGE_TYPE,
+                                           PassThroughConstants.CONTENT_TYPE_MULTIPART_RELATED);
                 }
 
                 MessageFormatter formatter = MessageFormatterDecoratorFactory.createMessageFormatterDecorator(msgContext);

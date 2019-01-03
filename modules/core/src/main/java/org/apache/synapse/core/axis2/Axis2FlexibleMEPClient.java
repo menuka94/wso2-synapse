@@ -313,6 +313,14 @@ public class Axis2FlexibleMEPClient {
                         org.apache.axis2.Constants.VALUE_TRUE);
                 axisOutMsgCtx.setDoingMTOM(true);
 
+                // Remove the Content-Type transport header if it is not multipart/related to honor the content
+                // type extracted from the SOAPMessageFormatter
+                Object trpHeaders = axisOutMsgCtx.getProperty(MessageContext.TRANSPORT_HEADERS);
+                if (trpHeaders instanceof Map && ((Map) trpHeaders).get(HTTPConstants.HEADER_CONTENT_TYPE) != null &&
+                        !isMultipartContent(((Map) trpHeaders).get(HTTPConstants.HEADER_CONTENT_TYPE).toString())) {
+                    ((Map) trpHeaders).remove(HTTPConstants.HEADER_CONTENT_TYPE);
+                }
+
             } else if (endpoint.isUseSwa()) {
                 axisOutMsgCtx.setDoingSwA(true);
                 // fix / workaround for AXIS2-1798
@@ -715,6 +723,17 @@ public class Axis2FlexibleMEPClient {
         return synCtx.getProperty(SynapseConstants.LAST_ENDPOINT) + ", URI : " + axisCtx.getTo().getAddress();
     }
 
+    /**
+     * Check whether the content type is multipart or not
+     *
+     * @param contentType Content-Type of the message
+     * @return true for multipart content types
+     */
+    private static boolean isMultipartContent(String contentType) {
+
+        return contentType.contains(HTTPConstants.MEDIA_TYPE_MULTIPART_FORM_DATA)
+                || contentType.contains(HTTPConstants.HEADER_ACCEPT_MULTIPART_RELATED);
+    }
 }
 
 // if(Utils.isClientThreadNonBlockingPropertySet(axisOutMsgCtx) ){
