@@ -1096,7 +1096,7 @@
       <com.jayway.jsonpath.version>2.4.0.wso2v1</com.jayway.jsonpath.version>
       <com.jayway.jsonpath.nonOrbit.version>2.4.0</com.jayway.jsonpath.nonOrbit.version>
       <qfj.version>1.5.3</qfj.version>
-      <org.bouncycastle.version>1.52</org.bouncycastle.version>
+      <org.bouncycastle.version>1.60</org.bouncycastle.version>
       <hc.httpcore.version>4.3.3</hc.httpcore.version>
       <httpcore-nio.wso2.version>4.3.3-wso2v4</httpcore-nio.wso2.version>
       <hc.httpclient.version>4.3.2</hc.httpclient.version>
