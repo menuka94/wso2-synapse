@@ -38,6 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.transport.nhttp.NhttpConstants;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.Pipe;
+import org.apache.synapse.transport.passthru.TargetRequest;
 import org.apache.synapse.transport.passthru.config.PassThroughConfiguration;
 
 import javax.xml.stream.XMLStreamException;
@@ -46,7 +47,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 
 public class RelayUtils {
 
@@ -270,6 +273,30 @@ public class RelayUtils {
 
         return isEmptyPayload;
     }
+
+    /**
+     * Check whether the we should overwrite the content type for the outgoing request.
+     *
+     * @param msgContext MessageContext
+     * @return whether to overwrite the content type for the outgoing request
+     */
+    public static boolean shouldOverwriteContentType(MessageContext msgContext, TargetRequest request) {
+        boolean builderInvoked = Boolean.TRUE
+                .equals(msgContext.getProperty(PassThroughConstants.MESSAGE_BUILDER_INVOKED));
+        boolean noEntityBodySet = Boolean.TRUE.equals(msgContext.getProperty(PassThroughConstants.NO_ENTITY_BODY));
+        Map<String, LinkedHashSet<String>> headers = request.getHeaders();
+        boolean contentTypeInRequest = false;
+        if (headers.size() != 0 && (headers.get("Content-Type") != null || headers.get("content-type") != null)) {
+            contentTypeInRequest = true;
+        }
+
+        // If builder is not invoked, which means the passthrough scenario, we should overwrite the content-type
+        // depending on the presence of the incoming content-type.
+        // If builder is invoked and no entity body property is not set (which means there is a payload in the request)
+        // we should consider overwriting the content-type.
+        return (builderInvoked && !noEntityBodySet) || contentTypeInRequest;
+    }
+
 
     private static void processAddressing(MessageContext messageContext) throws AxisFault {
         if (noAddressingHandler) {
