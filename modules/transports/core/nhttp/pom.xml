@@ -53,11 +53,9 @@
                         <Import-Package>
                             !javax.xml.namespace,
                             javax.xml.namespace; version=0.0.0,
+                            org.bouncycastle.*;version="${imp.pkg.version.wso2.bouncycastle}",
                             *; resolution:=optional
                         </Import-Package>
-                        <Embed-Dependency>
-                            bcpkix-jdk15on;scope=compile|runtime
-                        </Embed-Dependency>
                     </instructions>
                 </configuration>
             </plugin>
@@ -191,7 +189,7 @@
         </dependency>
         <!-- BouncyCastle Api which needs when validating Certificates. -->
         <dependency>
-            <groupId>org.bouncycastle</groupId>
+            <groupId>org.wso2.orbit.org.bouncycastle</groupId>
             <artifactId>bcpkix-jdk15on</artifactId>
         </dependency>
         <dependency>
