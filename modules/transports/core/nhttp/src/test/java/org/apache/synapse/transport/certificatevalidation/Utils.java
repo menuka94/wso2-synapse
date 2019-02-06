@@ -18,6 +18,7 @@
  */
 package org.apache.synapse.transport.certificatevalidation;
 
+import org.apache.synapse.commons.crypto.CryptoConstants;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -59,7 +60,7 @@ public class Utils {
         ContentSigner contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digAlgId)
                 .build(PrivateKeyFactory.createKey(pair.getPrivate().getEncoded()));
         X509CertificateHolder certificateHolder = builder.build(contentSigner);
-        return new JcaX509CertificateConverter().setProvider("BC").getCertificate(certificateHolder);
+        return new JcaX509CertificateConverter().setProvider(CryptoConstants.BOUNCY_CASTLE_PROVIDER).getCertificate(certificateHolder);
     }
 
 
@@ -133,7 +134,8 @@ public class Utils {
                 .build(PrivateKeyFactory.createKey(entityKeyPair.getPrivate().getEncoded()));
 
         X509CertificateHolder certificateHolder = certBuilder.build(contentSigner);
-        X509Certificate entityCert = new JcaX509CertificateConverter().setProvider("BC").getCertificate(certificateHolder);
+        X509Certificate entityCert = new JcaX509CertificateConverter()
+                .setProvider(CryptoConstants.BOUNCY_CASTLE_PROVIDER).getCertificate(certificateHolder);
         return new X509Certificate[]{entityCert, rootCert};
     }
 

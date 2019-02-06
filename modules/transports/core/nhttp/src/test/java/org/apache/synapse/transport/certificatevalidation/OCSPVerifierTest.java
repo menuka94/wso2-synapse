@@ -19,6 +19,7 @@
 package org.apache.synapse.transport.certificatevalidation;
 
 import junit.framework.TestCase;
+import org.apache.synapse.commons.crypto.CryptoConstants;
 import org.apache.synapse.transport.certificatevalidation.ocsp.OCSPCache;
 import org.apache.synapse.transport.certificatevalidation.ocsp.OCSPVerifier;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -181,6 +182,6 @@ public class OCSPVerifierTest extends TestCase {
         ContentSigner contentSigner = new BcRSAContentSignerBuilder(sigAlgId, digAlgId)
                 .build(PrivateKeyFactory.createKey(caKey.getEncoded()));
         X509CertificateHolder certificateHolder = certBuilder.build(contentSigner);
-        return new JcaX509CertificateConverter().setProvider("BC").getCertificate(certificateHolder);
+        return new JcaX509CertificateConverter().setProvider(CryptoConstants.BOUNCY_CASTLE_PROVIDER).getCertificate(certificateHolder);
     }
 }
