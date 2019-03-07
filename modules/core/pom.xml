@@ -199,6 +199,7 @@
 							!org.apache.commons.io,
 							org.apache.commons.io; version=0.0.0,
 							org.quartz.*;version="${quartz.version}",
+							org.wso2.transports.http.bridge,
 							*;resolution:=optional,
                         </Import-Package>
 						<DynamicImport-Package>*</DynamicImport-Package>
@@ -390,6 +391,13 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.wso2.transports.http.bridge</groupId>
+			<artifactId>transport-netty-axis-bridge</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<!--<scope>system</scope>-->
+			<!--<systemPath>${project.basedir}/src/main/resources/transport-netty-axis-bridge-1.0-SNAPSHOT.jar</systemPath>-->
 		</dependency>
 	</dependencies>
 <properties>
