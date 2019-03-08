@@ -199,7 +199,7 @@
 							!org.apache.commons.io,
 							org.apache.commons.io; version=0.0.0,
 							org.quartz.*;version="${quartz.version}",
-							org.wso2.transports.http.bridge,
+							org.wso2.transports.http.bridge;version=1.0.0,
 							*;resolution:=optional,
                         </Import-Package>
 						<DynamicImport-Package>*</DynamicImport-Package>
