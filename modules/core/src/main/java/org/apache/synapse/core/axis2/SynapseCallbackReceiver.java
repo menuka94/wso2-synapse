@@ -57,7 +57,9 @@ import org.apache.synapse.transport.passthru.config.SourceConfiguration;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.apache.synapse.util.ConcurrencyThrottlingUtils;
 import org.apache.synapse.util.ResponseAcceptEncodingProcessor;
+import org.apache.synapse.SynapseHandler;
 
+import java.util.Iterator;
 import java.util.Stack;
 import java.util.Timer;
 
@@ -477,7 +479,8 @@ public class SynapseCallbackReceiver extends CallbackReceiver {
                 }
 
                 if ((synapseInMessageContext.getEnvelope() != null) && synapseInMessageContext.getEnvelope().hasFault()) {
-                
+
+                    invokeHandlers(synapseInMessageContext);
                     if(log.isDebugEnabled()){
                         log.debug("SOAPFault found in response message, forcing endpoint "+
                                 successfulEndpoint.getName()+" to fail");
@@ -661,5 +664,34 @@ public class SynapseCallbackReceiver extends CallbackReceiver {
         if (proxyService != null) {
             proxyService.registerFaultHandler(synCtx);
         }
+    }
+
+    /**
+     * Invoke Synapse Handlers
+     *
+     * @param synCtx synapse message context
+     * @return whether flow should continue further
+     */
+    private boolean invokeHandlers(org.apache.synapse.MessageContext synCtx) {
+        Iterator<SynapseHandler> iterator = synCtx.getEnvironment().getSynapseHandlers().iterator();
+        if (iterator.hasNext()) {
+            Boolean isContinuationCall = (Boolean) synCtx.getProperty(SynapseConstants.CONTINUATION_CALL);
+            if (synCtx.isResponse() || (isContinuationCall != null && isContinuationCall)) {
+                while (iterator.hasNext()) {
+                    SynapseHandler handler = iterator.next();
+                    if (!handler.handleResponseInFlow(synCtx)) {
+                        return false;
+                    }
+                }
+            } else {
+                while (iterator.hasNext()) {
+                    SynapseHandler handler = iterator.next();
+                    if (!handler.handleRequestInFlow(synCtx)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 }
