@@ -110,40 +110,40 @@ public class RelaySecuirtyMessageBuilderDispatchandler  extends AbstractDispatch
 	}
 
 	private void handlePOXRequests(MessageContext messageContext, SOAPHeader header) {
-	    String contentType = (String) messageContext.getProperty(Constants.Configuration.CONTENT_TYPE);
-	    String _contentType =contentType;
-	    if (contentType != null) {
-	    	int j = contentType.indexOf(";");
-	    	if (j > 0) {
-	    		_contentType = contentType.substring(0, j);
-	    	}
-	    }
-	     
-	    //if the request message is a POX and if authenticate enables, which means a custom security header added to the SOAP header
-	    //and in PT case, since the message is getting build forcefully we need to make sure the POX security headers added by POXSecurityHandler
-	    //is existing in the newly build soap envelope.
+		String contentType = (String) messageContext.getProperty(Constants.Configuration.CONTENT_TYPE);
+		String _contentType = contentType;
+		if (contentType != null) {
+			int j = contentType.indexOf(";");
+			if (j > 0) {
+				_contentType = contentType.substring(0, j);
+			}
+		}
+
+		//if the request message is a POX and if authenticate enables, which means a custom security header added to the SOAP header
+		//and in PT case, since the message is getting build forcefully we need to make sure the POX security headers added by POXSecurityHandler
+		//is existing in the newly build soap envelope.
 
         /*Handling SOAP with BasicAuth*/
-        boolean isSOAPWithBasicAuth = false;
-        Object o = messageContext.getProperty(MessageContext.TRANSPORT_HEADERS);
-        if (o != null && o instanceof Map) {
-            Map httpHeaders = (Map) o;
-            for (Object httpHeader : httpHeaders.keySet()) {
-                Object value = httpHeaders.get(httpHeader);
-                if (httpHeader instanceof String && value != null && value instanceof String) {
-                    if (HTTPConstants.HEADER_AUTHORIZATION.equalsIgnoreCase((String) httpHeader) && ((String) value).startsWith("Basic")) {
-                        isSOAPWithBasicAuth = true;
-                        break;
-                    }
-                }
-            }
-        }
+		boolean isSOAPWithBasicAuth = false;
+		Object o = messageContext.getProperty(MessageContext.TRANSPORT_HEADERS);
+		if (o != null && o instanceof Map) {
+			Map httpHeaders = (Map) o;
+			for (Object httpHeader : httpHeaders.keySet()) {
+				Object value = httpHeaders.get(httpHeader);
+				if (httpHeader instanceof String && value != null && value instanceof String) {
+					if (HTTPConstants.HEADER_AUTHORIZATION.equalsIgnoreCase((String) httpHeader) && ((String) value).startsWith("Basic")) {
+						isSOAPWithBasicAuth = true;
+						break;
+					}
+				}
+			}
+		}
 
-        if (_contentType != null && _contentType.equals(APPLICATION_XML) && header != null
-                && header.getChildElements() != null
+		if (_contentType != null && _contentType.equals(APPLICATION_XML) && header != null
+				&& header.getChildElements() != null
 				&& messageContext.isDoingREST()
 				&& isSOAPWithBasicAuth) {
-            try {
+			try {
 				OMElement poxSecurityHeader = AXIOMUtil.stringToOM(header.toString()).getFirstElement();
 
 				if (poxSecurityHeader != null) {
@@ -178,12 +178,12 @@ public class RelaySecuirtyMessageBuilderDispatchandler  extends AbstractDispatch
 						messageContext.getEnvelope().getHeader().addChild(soapBloackingHeader);
 					}
 				}
-            } catch (Exception e) {
-                log.error("Error while executing the message at relaySecurity handler", e);
-            }
+			} catch (Exception e) {
+				log.error("Error while executing the message at relaySecurity handler", e);
+			}
 
-        }
-    }
+		}
+	}
 
 	private void build(MessageContext messageContext) {
 	    try {
