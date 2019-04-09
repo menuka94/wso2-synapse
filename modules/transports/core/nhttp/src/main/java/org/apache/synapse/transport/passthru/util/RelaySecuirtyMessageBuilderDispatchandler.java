@@ -125,13 +125,14 @@ public class RelaySecuirtyMessageBuilderDispatchandler  extends AbstractDispatch
 
         /*Handling SOAP with BasicAuth*/
 		boolean isSOAPWithBasicAuth = false;
-		Object o = messageContext.getProperty(MessageContext.TRANSPORT_HEADERS);
-		if (o != null && o instanceof Map) {
-			Map httpHeaders = (Map) o;
+		Object transportHeaders = messageContext.getProperty(MessageContext.TRANSPORT_HEADERS);
+		if (transportHeaders != null && transportHeaders instanceof Map) {
+			Map httpHeaders = (Map) transportHeaders;
 			for (Object httpHeader : httpHeaders.keySet()) {
 				Object value = httpHeaders.get(httpHeader);
 				if (httpHeader instanceof String && value != null && value instanceof String) {
-					if (HTTPConstants.HEADER_AUTHORIZATION.equalsIgnoreCase((String) httpHeader) && ((String) value).startsWith("Basic")) {
+					if (HTTPConstants.HEADER_AUTHORIZATION.equalsIgnoreCase((String) httpHeader) &&
+							((String) value).startsWith("Basic")) {
 						isSOAPWithBasicAuth = true;
 						break;
 					}
