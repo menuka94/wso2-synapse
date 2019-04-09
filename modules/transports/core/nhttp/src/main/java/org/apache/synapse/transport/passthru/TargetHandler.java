@@ -780,7 +780,7 @@ public class TargetHandler implements NHttpClientEventHandler {
         } else if (ex instanceof HttpException) {
             String message = getErrorMessage("HTTP protocol violation : " + ex.getMessage(), conn);
             log.error(message, ex);
-            if (targetConfiguration.isCorrelationLoggingEnabled()){
+            if (targetConfiguration.isCorrelationLoggingEnabled()) {
                 logHttpRequestErrorInCorrelationLog(conn, "HTTP Exception in " + state.name());
             }
 
