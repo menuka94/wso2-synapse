@@ -41,6 +41,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 import org.apache.synapse.transport.passthru.Pipe;
 
+import javax.xml.namespace.QName;
+import java.util.Iterator;
 import java.util.Map;
 
 public class RelaySecuirtyMessageBuilderDispatchandler  extends AbstractDispatcher{
@@ -108,58 +110,81 @@ public class RelaySecuirtyMessageBuilderDispatchandler  extends AbstractDispatch
 	}
 
 	private void handlePOXRequests(MessageContext messageContext, SOAPHeader header) {
-	    String contentType = (String) messageContext.getProperty(Constants.Configuration.CONTENT_TYPE);
-	    String _contentType =contentType;
-	    if (contentType != null) {
-	    	int j = contentType.indexOf(";");
-	    	if (j > 0) {
-	    		_contentType = contentType.substring(0, j);
-	    	}
-	    }
-	     
-	    //if the request message is a POX and if authenticate enables, which means a custom security header added to the SOAP header
-	    //and in PT case, since the message is getting build forcefully we need to make sure the POX security headers added by POXSecurityHandler
-	    //is existing in the newly build soap envelope.
+		String contentType = (String) messageContext.getProperty(Constants.Configuration.CONTENT_TYPE);
+		String _contentType = contentType;
+		if (contentType != null) {
+			int j = contentType.indexOf(";");
+			if (j > 0) {
+				_contentType = contentType.substring(0, j);
+			}
+		}
+
+		//if the request message is a POX and if authenticate enables, which means a custom security header added to the SOAP header
+		//and in PT case, since the message is getting build forcefully we need to make sure the POX security headers added by POXSecurityHandler
+		//is existing in the newly build soap envelope.
 
         /*Handling SOAP with BasicAuth*/
-        boolean isSOAPWithBasicAuth = false;
-        Object o = messageContext.getProperty(MessageContext.TRANSPORT_HEADERS);
-        if (o != null && o instanceof Map) {
-            Map httpHeaders = (Map) o;
-            for (Object httpHeader : httpHeaders.keySet()) {
-                Object value = httpHeaders.get(httpHeader);
-                if (httpHeader instanceof String && value != null && value instanceof String) {
-                    if (HTTPConstants.HEADER_AUTHORIZATION.equalsIgnoreCase((String) httpHeader) && ((String) value).startsWith("Basic")) {
-                        isSOAPWithBasicAuth = true;
-                        break;
-                    }
-                }
-            }
-        }
+		boolean isSOAPWithBasicAuth = false;
+		Object transportHeaders = messageContext.getProperty(MessageContext.TRANSPORT_HEADERS);
+		if (transportHeaders != null && transportHeaders instanceof Map) {
+			Map httpHeaders = (Map) transportHeaders;
+			for (Object httpHeader : httpHeaders.keySet()) {
+				Object value = httpHeaders.get(httpHeader);
+				if (httpHeader instanceof String && value != null && value instanceof String) {
+					if (HTTPConstants.HEADER_AUTHORIZATION.equalsIgnoreCase((String) httpHeader) &&
+							((String) value).startsWith("Basic")) {
+						isSOAPWithBasicAuth = true;
+						break;
+					}
+				}
+			}
+		}
 
-        if (_contentType != null && _contentType.equals(APPLICATION_XML) && header != null
-                && header.getChildElements() != null
-                || messageContext.isDoingREST()
-                || isSOAPWithBasicAuth) {
-            try {
-                OMElement element = AXIOMUtil.stringToOM(header.toString());
-                OMNamespace omNamespace =
-                        OMAbstractFactory.getOMFactory().createOMNamespace(WSS_WSSECURITY_SECEXT_1_0_XSD, WSSE);
-                SOAPHeaderBlock soapBloackingHeader = OMAbstractFactory.getSOAP12Factory().createSOAPHeaderBlock("Security", omNamespace);
-                OMElement securityHeader = element.getFirstElement();
-                if (securityHeader != null) {
-                    while (securityHeader.getChildElements().hasNext()) {
-                        soapBloackingHeader.addChild((OMNode) securityHeader.getChildElements().next());
-                    }
+		if (_contentType != null && _contentType.equals(APPLICATION_XML) && header != null
+				&& header.getChildElements() != null
+				&& messageContext.isDoingREST()
+				&& isSOAPWithBasicAuth) {
+			try {
+				OMElement poxSecurityHeader = AXIOMUtil.stringToOM(header.toString()).getFirstElement();
 
-                    messageContext.getEnvelope().getHeader().addChild(soapBloackingHeader);
-                }
-            } catch (Exception e) {
-                log.error("Error while executing the message at relaySecurity handler", e);
-            }
+				if (poxSecurityHeader != null) {
+					OMNamespace omNamespace =
+							OMAbstractFactory.getOMFactory().createOMNamespace(WSS_WSSECURITY_SECEXT_1_0_XSD, WSSE);
 
-        }
-    }
+					Iterator headerIterator = messageContext.getEnvelope().getHeader().examineAllHeaderBlocks();
+
+					// If a ws:Security header already exists, we should add the POX headers to the same element instead
+					// of creating a new Sec Header.
+					boolean existingWSSecurityHeaderFound = false;
+
+					while (headerIterator.hasNext()) {
+						OMElement headerElement = (OMElement) headerIterator.next();
+
+						if (headerElement.getQName().equals(new QName(WSS_WSSECURITY_SECEXT_1_0_XSD, "Security"))) {
+							while (poxSecurityHeader.getChildElements().hasNext()) {
+								headerElement.addChild((OMNode) poxSecurityHeader.getChildElements().next());
+							}
+							existingWSSecurityHeaderFound = true;
+							break;
+						}
+					}
+
+					if (!existingWSSecurityHeaderFound) {
+						SOAPHeaderBlock soapBloackingHeader = OMAbstractFactory.getSOAP12Factory()
+								.createSOAPHeaderBlock("Security", omNamespace);
+
+						while (poxSecurityHeader.getChildElements().hasNext()) {
+							soapBloackingHeader.addChild((OMNode) poxSecurityHeader.getChildElements().next());
+						}
+						messageContext.getEnvelope().getHeader().addChild(soapBloackingHeader);
+					}
+				}
+			} catch (Exception e) {
+				log.error("Error while executing the message at relaySecurity handler", e);
+			}
+
+		}
+	}
 
 	private void build(MessageContext messageContext) {
 	    try {
