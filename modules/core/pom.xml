@@ -392,13 +392,13 @@
 			<artifactId>slf4j-log4j12</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.wso2.transports.http.bridge</groupId>
-			<artifactId>transport-netty-axis-bridge</artifactId>
-			<version>1.0-SNAPSHOT</version>
-			<!--<scope>system</scope>-->
-			<!--<systemPath>${project.basedir}/src/main/resources/transport-netty-axis-bridge-1.0-SNAPSHOT.jar</systemPath>-->
-		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>org.wso2.transports.http.bridge</groupId>-->
+			<!--<artifactId>transport-netty-axis-bridge</artifactId>-->
+			<!--<version>1.0-SNAPSHOT</version>-->
+			<!--&lt;!&ndash;<scope>system</scope>&ndash;&gt;-->
+			<!--&lt;!&ndash;<systemPath>${project.basedir}/src/main/resources/transport-netty-axis-bridge-1.0-SNAPSHOT.jar</systemPath>&ndash;&gt;-->
+		<!--</dependency>-->
 	</dependencies>
 <properties>
 		<version.orbit.rabbitmq>3.6.6.wso2v1</version.orbit.rabbitmq>
