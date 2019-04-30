@@ -420,14 +420,8 @@ public class SynapseCallbackReceiver extends CallbackReceiver {
                 response.removeProperty(AddressingConstants.DISABLE_ADDRESSING_FOR_OUT_MESSAGES);
             }
 
-            Object messageType = axisOutMsgCtx.getProperty(
-                    org.apache.axis2.Constants.Configuration.MESSAGE_TYPE);
-            if (!HTTPConstants.MEDIA_TYPE_X_WWW_FORM.equals(messageType)) {
-                 // copy the message type property that's used by the out message to the
-                 // response message
-                response.setProperty(org.apache.axis2.Constants.Configuration.MESSAGE_TYPE,
-                    messageType);
-            }
+            response.setProperty(org.apache.axis2.Constants.Configuration.MESSAGE_TYPE,
+                    response.getProperty(Constants.Configuration.CONTENT_TYPE));
 
             // compare original received message (axisOutMsgCtx) soap version with the response
             // if they are different change to original version 
