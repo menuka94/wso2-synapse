@@ -359,6 +359,10 @@ public class PassThroughTransportUtils {
     	}else{
     		format = new OMOutputFormat();
     	}
+
+        /* Keep the formatter information to prevent multipart boundary override (this will be the content writing
+        to header) */
+        msgContext.setProperty(PassThroughConstants.MESSAGE_OUTPUT_FORMAT, format);
      
         msgContext.setDoingMTOM(TransportUtils.doWriteMTOM(msgContext));
         msgContext.setDoingSwA(TransportUtils.doWriteSwA(msgContext));

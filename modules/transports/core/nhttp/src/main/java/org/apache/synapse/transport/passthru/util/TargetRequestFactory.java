@@ -221,10 +221,7 @@ public class TargetRequestFactory {
         OMOutputFormat format = PassThroughTransportUtils.getOMOutputFormat(msgCtx);
         
         if (formatter != null) {
-            String contentType= formatter.getContentType(msgCtx, format, msgCtx.getSoapAction());
-          //keep the formatter information to prevent multipart boundary override (this will be the content writing to header)
-            msgCtx.setProperty(PassThroughConstants.MESSAGE_OUTPUT_FORMAT, format);
-            return contentType;
+            return formatter.getContentType(msgCtx, format, msgCtx.getSoapAction());
             
         } else {
             String contentType = (String) msgCtx.getProperty(Constants.Configuration.CONTENT_TYPE);
