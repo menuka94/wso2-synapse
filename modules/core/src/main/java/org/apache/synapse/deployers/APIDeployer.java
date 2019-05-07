@@ -45,8 +45,8 @@ public class APIDeployer extends AbstractSynapseArtifactDeployer {
 
         try {
             API api = APIFactory.createAPI(artifactConfig, properties);
-            api.setArtifactContainerName(customLogContent);
             if (api != null) {
+                api.setArtifactContainerName(customLogContent);
                 api.setFileName((new File(fileName)).getName());
                 if (log.isDebugEnabled()) {
                     log.debug("API named '" + api.getName()
