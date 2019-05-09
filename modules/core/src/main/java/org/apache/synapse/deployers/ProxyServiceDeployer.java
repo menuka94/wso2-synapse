@@ -58,8 +58,8 @@ public class ProxyServiceDeployer extends AbstractSynapseArtifactDeployer {
 
         try {
             ProxyService proxy = ProxyServiceFactory.createProxy(artifactConfig, properties);
-            proxy.setArtifactContainerName(customLogContent);
             if (proxy != null) {
+                proxy.setArtifactContainerName(customLogContent);
                 if (getSynapseConfiguration().getProxyService(proxy.getName()) != null) {
                     log.warn("Hot deployment thread picked up an already deployed proxy - Ignoring");
                     return proxy.getName();
@@ -78,9 +78,9 @@ public class ProxyServiceDeployer extends AbstractSynapseArtifactDeployer {
                     log.debug("Initialized the ProxyService : " + proxy.getName());
                 }
 
-                getSynapseConfiguration().addProxyService(proxy.getName(), proxy);
                 AxisService axisService = proxy.buildAxisService(getSynapseConfiguration(),
                                                   getSynapseConfiguration().getAxisConfiguration());
+                getSynapseConfiguration().addProxyService(proxy.getName(), proxy);
 
                 if (axisService == null) {
                     if (log.isDebugEnabled()) {
