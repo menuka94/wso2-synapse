@@ -56,8 +56,9 @@ public class ProxyServiceDeployer extends AbstractSynapseArtifactDeployer {
             log.debug("ProxyService Deployment from file : " + filePath + " : Started");
         }
 
+        ProxyService proxy = null;
         try {
-            ProxyService proxy = ProxyServiceFactory.createProxy(artifactConfig, properties);
+            proxy = ProxyServiceFactory.createProxy(artifactConfig, properties);
             if (proxy != null) {
                 proxy.setArtifactContainerName(customLogContent);
                 if (getSynapseConfiguration().getProxyService(proxy.getName()) != null) {
@@ -78,9 +79,9 @@ public class ProxyServiceDeployer extends AbstractSynapseArtifactDeployer {
                     log.debug("Initialized the ProxyService : " + proxy.getName());
                 }
 
+                getSynapseConfiguration().addProxyService(proxy.getName(), proxy);
                 AxisService axisService = proxy.buildAxisService(getSynapseConfiguration(),
                                                   getSynapseConfiguration().getAxisConfiguration());
-                getSynapseConfiguration().addProxyService(proxy.getName(), proxy);
 
                 if (axisService == null) {
                     if (log.isDebugEnabled()) {
@@ -117,8 +118,13 @@ public class ProxyServiceDeployer extends AbstractSynapseArtifactDeployer {
                 handleSynapseArtifactDeploymentError(
                         "ProxyService Deployment from the file : " + filePath + " : Failed.", e);
             }*/
-            handleSynapseArtifactDeploymentError(
-                    "ProxyService Deployment from the file : " + filePath + " : Failed.", e);
+            if (proxy != null && proxy.getName() != null) {
+                handleSynapseArtifactDeploymentError(
+                        "ProxyService Deployment from the file : " + filePath + " : Failed.", e, proxy.getName());
+            } else {
+                handleSynapseArtifactDeploymentError(
+                        "ProxyService Deployment from the file : " + filePath + " : Failed.", e);
+            }
         }
         return null;
     }

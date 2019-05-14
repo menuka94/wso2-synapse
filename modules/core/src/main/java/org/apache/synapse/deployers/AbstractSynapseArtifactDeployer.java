@@ -482,6 +482,19 @@ public abstract class AbstractSynapseArtifactDeployer extends AbstractDeployer {
         throw new SynapseArtifactDeploymentException(msg, e);
     }
 
+    /**
+     * Overloaded the method to perform the undeployment of synapse artifacts when the exception is being
+     * handled. otherwise there are unwanted synapse artifacts after a failed deployment.
+     * @param msg log message
+     * @param e error message
+     * @param artifactName name of the artifact that will be undeployed
+     */
+    protected void handleSynapseArtifactDeploymentError(String msg, Exception e, String artifactName) {
+        deployerLog.error(msg, e);
+        undeploySynapseArtifact(artifactName);
+        throw new SynapseArtifactDeploymentException(msg, e);
+    }
+
     private void handleDeploymentError(String msg, Exception e, String fileName)
             throws DeploymentException {
         fileName = SynapseArtifactDeploymentStore.getNormalizedAbsolutePath(fileName);
