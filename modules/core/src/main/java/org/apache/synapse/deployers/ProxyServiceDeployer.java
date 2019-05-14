@@ -56,8 +56,9 @@ public class ProxyServiceDeployer extends AbstractSynapseArtifactDeployer {
             log.debug("ProxyService Deployment from file : " + filePath + " : Started");
         }
 
-        ProxyService proxy = ProxyServiceFactory.createProxy(artifactConfig, properties);
+        ProxyService proxy = null;
         try {
+            proxy = ProxyServiceFactory.createProxy(artifactConfig, properties);
             if (proxy != null) {
                 proxy.setArtifactContainerName(customLogContent);
                 if (getSynapseConfiguration().getProxyService(proxy.getName()) != null) {
@@ -117,9 +118,13 @@ public class ProxyServiceDeployer extends AbstractSynapseArtifactDeployer {
                 handleSynapseArtifactDeploymentError(
                         "ProxyService Deployment from the file : " + filePath + " : Failed.", e);
             }*/
-            handleSynapseArtifactDeploymentError(
-                    "ProxyService Deployment from the file : " + filePath + " : Failed.", e,
-                    proxy.getName());
+            if (proxy != null && proxy.getName() != null) {
+                handleSynapseArtifactDeploymentError(
+                        "ProxyService Deployment from the file : " + filePath + " : Failed.", e, proxy.getName());
+            } else {
+                handleSynapseArtifactDeploymentError(
+                        "ProxyService Deployment from the file : " + filePath + " : Failed.", e);
+            }
         }
         return null;
     }
