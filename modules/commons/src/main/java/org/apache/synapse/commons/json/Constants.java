@@ -113,5 +113,8 @@ final class Constants {
      */
     public static final String SYNAPSE_JSON_TO_XML_PROCESS_INSTRUCTION_ENABLE = "synapse.json.to.xml.processing.instruction.enabled";
 
+    // Property to preserve spaces in XML -> JSON transformation
+    public static final String PRESERVE_SPACES = "PRESERVE_SPACES";
+
 
 }
