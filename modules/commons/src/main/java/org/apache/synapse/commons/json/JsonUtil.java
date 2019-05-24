@@ -288,7 +288,7 @@ public final class JsonUtil {
                 throw new AxisFault("Could not write JSON stream.", e);
             }
         } else if (element != null) { // No JSON stream found. Convert the existing element to JSON.
-            writeAsJson(populateRequiredProperties(messageContext), element, out);
+            writeAsJson(element, out, populateRequiredProperties(messageContext));
         } else if (jsonStr != null) { // No JSON stream or element found. See if there's a JSON_STRING set.
             try {
                 out.write(jsonStr.getBytes());
@@ -383,7 +383,6 @@ public final class JsonUtil {
      */
     public static void writeAsJson(OMElement element, OutputStream outputStream) throws AxisFault {
         if (element == null) {
-            logger.error("#writeAsJson. OMElement is null. Cannot convert to JSON.");
             throw new AxisFault("OMElement is null. Cannot convert to JSON.");
         }
         if (outputStream == null) {
@@ -398,22 +397,21 @@ public final class JsonUtil {
      * Note that this method removes all existing namespace declarations and namespace prefixes of the provided XML
      * element<br/>
      *
-     * @param requiredProperties Message context properties
-     * @param element            XML element of which JSON representation is expected.
-     * @param outputStream       Output Stream to write the JSON representation.<br/>
-     *                           At the end of a successful conversion, its flush method will be called.
+     * @param element      XML element of which JSON representation is expected.
+     * @param outputStream Output Stream to write the JSON representation.<br/>
+     *                     At the end of a successful conversion, its flush method will be called.
+     * @param properties   Message context properties
      * @throws AxisFault
      */
-    public static void writeAsJson(Map requiredProperties, OMElement element, OutputStream outputStream) throws
+    public static void writeAsJson(OMElement element, OutputStream outputStream, Map properties) throws
             AxisFault {
         if (element == null) {
-            logger.error("#writeAsJson. OMElement is null. Cannot convert to JSON.");
             throw new AxisFault("OMElement is null. Cannot convert to JSON.");
         }
         if (outputStream == null) {
             return;
         }
-        transformElement(requiredProperties, element, true);
+        transformElement(element, properties, true);
         convertOMElementToJson(element, outputStream);
     }
 
@@ -446,11 +444,8 @@ public final class JsonUtil {
             jsonWriter.add(xmlEventReader);
             outputStream.flush();
         } catch (XMLStreamException e) {
-            logger.error("#writeAsJson. Could not convert OMElement to JSON. Invalid XML payload. Error>>> "
-                                 + e.getLocalizedMessage());
             throw new AxisFault("Could not convert OMElement to JSON. Invalid XML payload.", e);
         } catch (IOException e) {
-            logger.error("#writeAsJson. Could not convert OMElement to JSON. Error>>> " + e.getLocalizedMessage());
             throw new AxisFault("Could not convert OMElement to JSON.", e);
         } finally {
             if (xmlEventReader != null) {
@@ -507,15 +502,16 @@ public final class JsonUtil {
 
     /**
      * Removes XML namespace declarations, and namespace prefixes from an XML element.
-     *  @param requiredProperties Message context properties
-     * @param element            Source XML element
-     * @param processAttrbs      Whether to remove the namespaces from attributes as well
+     *
+     * @param element       Source XML element
+     * @param properties    Message context properties
+     * @param processAttrbs Whether to remove the namespaces from attributes as well
      */
-    public static void transformElement(Map requiredProperties, OMElement element, boolean processAttrbs) {
+    public static void transformElement(OMElement element, Map properties, boolean processAttrbs) {
         if (element == null) {
             return;
         }
-        removeIndentations(requiredProperties, element);
+        removeIndentations(element, properties);
         if (!preserverNamespacesForJson) {
             removeNamespaces(element, processAttrbs);
         }
@@ -529,7 +525,7 @@ public final class JsonUtil {
         while (children.hasNext()) {
             OMNode child = (OMNode) children.next();
             if (child instanceof OMText) {
-                if ("".equals(((OMText) child).getText().trim())) {
+                if ((((OMText) child).getText().trim()).isEmpty()) {
                     children.remove();
                 }
             } else if (child instanceof OMElement) {
@@ -541,27 +537,27 @@ public final class JsonUtil {
     /**
      * Remove indentations of a OMElement.
      * If PRESERVE_SPACES property in the requiredProperties is true, spaces inside XML elements will be preserved.
-     *  @param requiredProperties Required properties
-     * @param elem               OMElement needed to remove indentations
+     *
+     * @param elem       OMElement needed to remove indentations
+     * @param properties Required properties
      */
-    private static void removeIndentations(Map requiredProperties, OMElement elem) {
+    private static void removeIndentations(OMElement elem, Map properties) {
         Iterator children = elem.getChildren();
+        boolean preserveSpaces = properties.get(Constants.PRESERVE_SPACES) != null
+                && Boolean.parseBoolean((String) properties.get(Constants.PRESERVE_SPACES));
+
         while (children.hasNext()) {
             OMNode child = (OMNode) children.next();
-
             if (child instanceof OMText) {
-                // preserve spaces of OMText if PRESERVE_SPACES property is true
-                if (requiredProperties.get(Constants.PRESERVE_SPACES) != null
-                        && Boolean.parseBoolean((String) requiredProperties.get(Constants.PRESERVE_SPACES))
-                        && child.getPreviousOMSibling() == null
-                        && child.getNextOMSibling() == null) {
+                // preserve spaces of OMText if preserve spaces property is true
+                if (preserveSpaces && child.getPreviousOMSibling() == null && child.getNextOMSibling() == null) {
                     continue;
                 }
-                if ("".equals(((OMText) child).getText().trim())) {
+                if ((((OMText) child).getText().trim()).isEmpty()) {
                     children.remove();
                 }
             } else if (child instanceof OMElement) {
-                removeIndentations(requiredProperties, (OMElement) child);
+                removeIndentations((OMElement) child, properties);
             }
         }
     }
