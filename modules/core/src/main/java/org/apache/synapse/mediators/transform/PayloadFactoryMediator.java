@@ -31,7 +31,6 @@ import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.Constants;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.protocol.HTTP;
@@ -44,15 +43,20 @@ import org.apache.synapse.mediators.Value;
 import org.apache.synapse.util.AXIOMUtils;
 import org.apache.synapse.util.xpath.SynapseJsonPath;
 import org.apache.synapse.util.xpath.SynapseXPath;
+import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 import javax.xml.namespace.QName;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.stream.XMLStreamException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -86,6 +90,8 @@ public class PayloadFactoryMediator extends AbstractMediator {
     private final static String ESCAPE_NEWLINE_WITH_EIGHT_BACK_SLASHES = "\\\\\\\\n";
     private final static String ESCAPE_CRETURN_WITH_EIGHT_BACK_SLASHES = "\\\\\\\\r";
     private final static String ESCAPE_TAB_WITH_EIGHT_BACK_SLASHES = "\\\\\\\\t";
+    private final static String XML_1_0 = "1.0";
+    private final static String XML_1_1 = "1.1";
     public static final String QUOTE_STRING_IN_PAYLOAD_FACTORY_JSON = "QUOTE_STRING_IN_PAYLOAD_FACTORY_JSON";
 
     private List<Argument> pathArgumentList = new ArrayList<Argument>();
@@ -487,7 +493,7 @@ public class PayloadFactoryMediator extends AbstractMediator {
                 value = arg.getValue();
                 details.setXml(isXML(value));
                 if (!details.isXml()) {
-                    value = StringEscapeUtils.escapeXml(value);
+                    value = escapeXMLEnvelope(synCtx, value);
                 }
                 value = Matcher.quoteReplacement(value);
             } else if (arg.getExpression() != null) {
@@ -498,7 +504,7 @@ public class PayloadFactoryMediator extends AbstractMediator {
                     // of the payload is XML.
                     details.setXml(isXML(value));
                     if (!details.isXml() && XML_TYPE.equals(getType()) && !isJson(value.trim())) {
-                        value = StringEscapeUtils.escapeXml(value);
+                        value = escapeXMLEnvelope(synCtx, value);
                     }
                     value = Matcher.quoteReplacement(value);
                 } else {
@@ -633,6 +639,26 @@ public class PayloadFactoryMediator extends AbstractMediator {
     @Override
     public boolean isContentAltering() {
         return true;
+    }
+
+    /**
+     * Escapes XML special characters
+     *
+     * @param msgCtx Message Context
+     * @param value XML String which needs to be escaped
+     * @return XML special char escaped string
+     */
+    private String escapeXMLEnvelope(MessageContext msgCtx, String value) {
+        //getting the xml version from the message
+        String xmlVersion = msgCtx.getEnvelope().getXMLStreamReader().getVersion();
+        if (xmlVersion == null) {
+            xmlVersion = XML_1_0;
+        }
+
+        if (XML_1_1.equals(xmlVersion)) {
+            return org.apache.commons.text.StringEscapeUtils.escapeXml11(value);
+        }
+        return org.apache.commons.text.StringEscapeUtils.escapeXml10(value);
     }
 
 }
