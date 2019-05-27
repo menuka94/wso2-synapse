@@ -90,6 +90,8 @@ public class PayloadFactoryMediator extends AbstractMediator {
     private final static String ESCAPE_NEWLINE_WITH_EIGHT_BACK_SLASHES = "\\\\\\\\n";
     private final static String ESCAPE_CRETURN_WITH_EIGHT_BACK_SLASHES = "\\\\\\\\r";
     private final static String ESCAPE_TAB_WITH_EIGHT_BACK_SLASHES = "\\\\\\\\t";
+    private final static String XML_1_0 = "1.0";
+    private final static String XML_1_1 = "1.1";
     public static final String QUOTE_STRING_IN_PAYLOAD_FACTORY_JSON = "QUOTE_STRING_IN_PAYLOAD_FACTORY_JSON";
 
     private List<Argument> pathArgumentList = new ArrayList<Argument>();
@@ -644,16 +646,9 @@ public class PayloadFactoryMediator extends AbstractMediator {
      *
      * @param msgCtx Message Context
      * @return xmlVersion in XML Declaration
-     * @throws ParserConfigurationException failure in building message envelope document
-     * @throws IOException Error reading message envelope
-     * @throws SAXException Error parsing message envelope
      */
-    private String checkXMLVersion(MessageContext msgCtx) throws IOException, SAXException, ParserConfigurationException {
-        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        InputSource inputSource = new InputSource(new StringReader(msgCtx.getEnvelope().toString()));
-        Document document = documentBuilder.parse(inputSource);
-        return document.getXmlVersion();
+    private String checkXMLVersion(MessageContext msgCtx) {
+        return msgCtx.getEnvelope().getXMLStreamReader().getVersion();
     }
 
     /**
@@ -664,19 +659,12 @@ public class PayloadFactoryMediator extends AbstractMediator {
      * @return XML special char escaped string
      */
     private String escapeXMLEnvelope(MessageContext msgCtx, String value) {
-        String xmlVersion = "1.0"; //Default is set to 1.0
-
-        try {
-            xmlVersion = checkXMLVersion(msgCtx);
-        } catch (IOException e) {
-            log.error("Error reading message envelope", e);
-        } catch (SAXException e) {
-            log.error("Error parsing message envelope", e);
-        } catch (ParserConfigurationException e) {
-            log.error("Error building message envelope document", e);
+        String xmlVersion = checkXMLVersion(msgCtx);
+        if (xmlVersion == null) {
+            xmlVersion = XML_1_0;
         }
 
-        if("1.1".equals(xmlVersion)) {
+        if (XML_1_1.equals(xmlVersion)) {
             return org.apache.commons.text.StringEscapeUtils.escapeXml11(value);
         } else {
             return org.apache.commons.text.StringEscapeUtils.escapeXml10(value);
