@@ -642,16 +642,6 @@ public class PayloadFactoryMediator extends AbstractMediator {
     }
 
     /**
-     * Checks and returns XML version of the envelope
-     *
-     * @param msgCtx Message Context
-     * @return xmlVersion in XML Declaration
-     */
-    private String checkXMLVersion(MessageContext msgCtx) {
-        return msgCtx.getEnvelope().getXMLStreamReader().getVersion();
-    }
-
-    /**
      * Escapes XML special characters
      *
      * @param msgCtx Message Context
@@ -659,16 +649,16 @@ public class PayloadFactoryMediator extends AbstractMediator {
      * @return XML special char escaped string
      */
     private String escapeXMLEnvelope(MessageContext msgCtx, String value) {
-        String xmlVersion = checkXMLVersion(msgCtx);
+        //getting the xml version from the message
+        String xmlVersion = msgCtx.getEnvelope().getXMLStreamReader().getVersion();
         if (xmlVersion == null) {
             xmlVersion = XML_1_0;
         }
 
         if (XML_1_1.equals(xmlVersion)) {
             return org.apache.commons.text.StringEscapeUtils.escapeXml11(value);
-        } else {
-            return org.apache.commons.text.StringEscapeUtils.escapeXml10(value);
         }
+        return org.apache.commons.text.StringEscapeUtils.escapeXml10(value);
     }
 
 }
