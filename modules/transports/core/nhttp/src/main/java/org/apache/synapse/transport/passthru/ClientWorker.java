@@ -193,8 +193,9 @@ public class ClientWorker implements Runnable {
         CustomLogSetter.getInstance().clearThreadLocalContent();
         TenantInfoInitiator tenantInfoInitiator = TenantInfoInitiatorProvider.getTenantInfoInitiator();
         if (tenantInfoInitiator != null) {
-            ServerWorker serverWorker = (ServerWorker) requestMessageContext.getProperty(Constants.OUT_TRANSPORT_INFO);
-            if (serverWorker != null) {
+            //check OUT_TRANSPORT_INFO is instanceOf ServerWorker to avoid possible classCastExceptions
+            if (requestMessageContext.getProperty(Constants.OUT_TRANSPORT_INFO) instanceof ServerWorker) {
+                ServerWorker serverWorker = (ServerWorker) requestMessageContext.getProperty(Constants.OUT_TRANSPORT_INFO);
                 // Request received to Synapse is originated from through the HTTP transport
                 SourceRequest sourceRequest = serverWorker.getSourceRequest();
                 if (sourceRequest != null) {
