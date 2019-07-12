@@ -590,7 +590,7 @@ public class SourceHandler implements NHttpServerEventHandler {
             }
         } else {
             log.error("Unexpected error: " + ex.getMessage(), ex);
-            if (sourceConfiguration.isCorrelationLoggingEnabled()){
+            if (sourceConfiguration.isCorrelationLoggingEnabled()) {
                 logHttpRequestErrorInCorrelationLog(conn, "Unexpected error");
             }
             SourceContext.updateState(conn, ProtocolState.CLOSED);
