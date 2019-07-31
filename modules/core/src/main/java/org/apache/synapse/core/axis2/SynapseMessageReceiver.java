@@ -87,7 +87,8 @@ public class SynapseMessageReceiver implements MessageReceiver {
         synCtx.setProperty(SynapseConstants.IS_CLIENT_DOING_SOAP11, mc.isSOAP11());
 
         TenantInfoConfigurator configurator = synCtx.getEnvironment().getTenantInfoConfigurator();
-        if (configurator != null) { configurator.extractTenantInfo(synCtx);
+        if (configurator != null) {
+            configurator.extractTenantInfo(synCtx);
         }
 
         try {
