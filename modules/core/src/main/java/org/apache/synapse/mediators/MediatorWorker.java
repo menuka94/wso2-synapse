@@ -77,7 +77,6 @@ public class MediatorWorker implements Runnable {
                 configurator.applyTenantInfo(synCtx);
             }
 
-
             if (synCtx.getEnvironment().isDebuggerEnabled()) {
                 SynapseDebugManager debugManager = synCtx.getEnvironment().getSynapseDebugManager();
                 debugManager.acquireMediationFlowLock();
