@@ -18,12 +18,13 @@
 
 package org.apache.synapse.transport.http.conn;
 
+import java.util.Base64;
 import org.apache.http.Header;
 import org.apache.http.HttpRequest;
 import org.apache.http.auth.AUTH;
 import org.apache.http.auth.AuthenticationException;
-import org.apache.http.auth.Credentials;
 import org.apache.http.auth.MalformedChallengeException;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
@@ -32,7 +33,7 @@ import org.apache.synapse.transport.passthru.PassThroughConstants;
 /**
  * ProfileProxyAuthenticator will be initialized when proxy profile is configured
  */
-public class ProfileProxyAuthenticator implements ProxyAuthenticator{
+public class ProfileProxyAuthenticator implements ProxyAuthenticator {
     private ProxyConfig proxyConfig;
     private BasicScheme basicScheme;
 
@@ -43,6 +44,7 @@ public class ProfileProxyAuthenticator implements ProxyAuthenticator{
     }
 
     /**
+     /**
      * this will add authentication header to the request
      * @param request outgoing http request
      * @param context http context
@@ -50,9 +52,14 @@ public class ProfileProxyAuthenticator implements ProxyAuthenticator{
      */
     public void authenticatePreemptively(HttpRequest request, HttpContext context) throws AuthenticationException {
         String targetHost = (String) context.getAttribute(PassThroughConstants.PROXY_PROFILE_TARGET_HOST);
-        Credentials proxyCredentials = proxyConfig.getCredentialsForTargetHost(targetHost);
+        UsernamePasswordCredentials proxyCredentials = proxyConfig.getCredentialsForTargetHost(targetHost);
         if (proxyCredentials != null) {
-            Header authHeader = basicScheme.authenticate(proxyCredentials, request, context);
+            String username = proxyCredentials.getUserName();
+            String password = proxyCredentials.getPassword();
+            String usernameAndPassword = username + ":" + password;
+
+            String encodedCredentials = Base64.getEncoder().encodeToString(usernameAndPassword.getBytes());
+            Header authHeader = new BasicHeader("Proxy-Authorization", "Basic " + encodedCredentials);
             request.addHeader(authHeader);
         }
     }
