@@ -18,6 +18,8 @@
 
 package org.apache.synapse.transport.http.conn;
 
+import javax.xml.bind.DatatypeConverter;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Header;
@@ -30,7 +32,6 @@ import org.apache.http.auth.params.AuthPNames;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EncodingUtils;
 import org.apache.synapse.transport.passthru.PassThroughConstants;
 
 /**
@@ -62,9 +63,16 @@ public class ProfileProxyAuthenticator implements ProxyAuthenticator {
             String password = proxyCredentials.getPassword();
             String usernameAndPassword = username + ":" + password;
 
-            byte[] bytes = base64.encode(EncodingUtils.getBytes(usernameAndPassword,
-                    getCredentialsCharset(request)));
-            Header authHeader = new BasicHeader("Proxy-Authorization", "Basic " + new String(bytes));
+
+            byte[] bytes = new byte[0];
+            try {
+                bytes = usernameAndPassword.getBytes(getCredentialsCharset(request));
+            } catch (UnsupportedEncodingException e) {
+
+            }
+            String encoded = DatatypeConverter.printBase64Binary(bytes);
+
+            Header authHeader = new BasicHeader("Proxy-Authorization", "Basic " + encoded);
             request.addHeader(authHeader);
         }
     }
