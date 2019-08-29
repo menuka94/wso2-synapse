@@ -57,6 +57,7 @@ public class API extends AbstractRESTProcessor implements ManagedLifecycle, Aspe
     private String context;
     private Map<String,Resource> resources = new LinkedHashMap<String,Resource>();
     private List<Handler> handlers = new ArrayList<Handler>();
+    private String swaggerResourcePath;
 
     private int protocol = RESTConstants.PROTOCOL_HTTP_AND_HTTPS;
 
@@ -164,6 +165,14 @@ public class API extends AbstractRESTProcessor implements ManagedLifecycle, Aspe
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public String getSwaggerResourcePath() {
+        return swaggerResourcePath;
+    }
+
+    public void setSwaggerResourcePath(String swaggerResourcePath) {
+        this.swaggerResourcePath = swaggerResourcePath;
     }
 
     public void addResource(Resource resource) {
