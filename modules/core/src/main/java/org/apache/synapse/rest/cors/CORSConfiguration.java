@@ -37,7 +37,7 @@ public class CORSConfiguration {
     private String allowedHeaders;
 
     private CORSConfiguration() {
-        enabled = SynapsePropertiesLoader.getBooleanProperty(RESTConstants.CORS_CONFIGURATION_ENABLED, true);
+        enabled = SynapsePropertiesLoader.getBooleanProperty(RESTConstants.CORS_CONFIGURATION_ENABLED, false);
 
         //Retrieve allowed origin list
         String allowedOriginListStr =
